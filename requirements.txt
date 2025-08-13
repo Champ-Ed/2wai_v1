@@ -1,0 +1,8 @@
+python-dotenv
+openai
+streamlit
+langgraph
+deeplake
+llama-index-core
+llama-index-embeddings-openai
+llama-index-vector-stores-deeplake
