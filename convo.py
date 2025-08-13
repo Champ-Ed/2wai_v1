@@ -65,6 +65,7 @@ class DeepLakePDFStore:
         # Unified read/write store
         self.vector_store = DeepLakeVectorStore(
     dataset_path=path,
+    creds=None,
     token=st.secrets.get("ACTIVELOOP_TOKEN", ""),
     read_only=False
 )
@@ -452,6 +453,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         asyncio.run(conv.store.flush())
         raise
+
 
 
 
