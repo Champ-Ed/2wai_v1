@@ -7,7 +7,7 @@ from llama_index.core import Settings
 
 # Session configuration
 session = {
-    "api_key": os.getenv("OPENAI_API_KEY"),
+    "api_key": st.secrets.get("OPENAI_API_KEY", ""),
     "model_name": "gpt-4",
     "base_url": "https://api.openai.com/v1",
     "persona_name": "Calum",
