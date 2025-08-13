@@ -4,7 +4,7 @@ import uuid
 from typing import TypedDict, List, Optional, Dict, Any, Callable
 from datetime import datetime, timezone
 from functools import lru_cache
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import openai
 from llama_index.vector_stores.deeplake import DeepLakeVectorStore
 from llama_index.core.schema import TextNode
@@ -19,7 +19,7 @@ from llama_index.core import Settings
 # from fastapi import FastAPI, HTTPException
 # import uvicorn
 
-load_dotenv()
+# load_dotenv()
 
 # ---------- Typed states ----------
 class AgentState(TypedDict, total=False):
@@ -52,7 +52,8 @@ async def get_embedding(text: str) -> List[float]:
 # ---------- DeepLake store with batching + async wrappers ----------
 class DeepLakePDFStore:
     def __init__(self, path: Optional[str] = None, commit_batch: int = 8, debug: bool = False):
-        path = path or f"hub://{os.getenv('ACTIVELOOP_ORG_ID')}/calum_v7"
+        org_id = st.secrets.get("ACTIVELOOP_ORG_ID", "")
+        path = path or f"hub://{org_id}/calum_v7"
         self.dataset_path = path
         self.commit_batch = commit_batch
         self.debug = debug or (os.getenv("DEBUG_CONVO") == "1")
@@ -60,12 +61,16 @@ class DeepLakePDFStore:
             print(f"[DL] Init store path={path} batch={commit_batch}")
 
         # Unified read/write store
+        # self.vector_store = DeepLakeVectorStore(
+        #     dataset_path=path,
+        #     token=st.secrets.get("ACTIVELOOP_TOKEN", ""),
+        #     read_only=False
+        # )
+
         self.vector_store = DeepLakeVectorStore(
             dataset_path=path,
-            token=os.getenv("ACTIVELOOP_TOKEN"),
             read_only=False
         )
-
         self.index = VectorStoreIndex.from_vector_store(self.vector_store)
 
     def debug_nodes(self, nodes: List[TextNode]):
@@ -411,9 +416,20 @@ class OrchestratedConversationalSystem:
 #     uvicorn.run("this_module:app", host="0.0.0.0", port=8000, reload=True)
 
 # ---------- Run CLI if invoked directly ----------
+
+
 if __name__ == "__main__":
+    # at the top of convo.py (before you read env vars)
+    
+    
+
+    import streamlit as st
+    os.environ.setdefault("OPENAI_API_KEY", st.secrets.get("OPENAI_API_KEY", ""))
+    os.environ.setdefault("ACTIVELOOP_TOKEN", st.secrets.get("ACTIVELOOP_TOKEN", ""))
+    os.environ.setdefault("ACTIVELOOP_ORG_ID", st.secrets.get("ACTIVELOOP_ORG_ID", ""))
+
     session = {
-        "api_key": os.getenv("OPENAI_API_KEY"),
+        "api_key": st.secrets.get("OPENAI_API_KEY", ""),
         "model_name": "gpt-4",
         "base_url": "https://api.openai.com/v1",
         "persona_name": "Calum",
